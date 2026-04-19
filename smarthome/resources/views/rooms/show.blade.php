@@ -16,9 +16,73 @@
             <div class="mt-4">
                 @foreach($piece->devices as $device)
                     <div class="bg-gray-700/50 backdrop-blur-lg border border-gray-600 rounded-lg p-4 mb-4">
-                        <h3 class="text-lg font-semibold">{{ $device->nom }}</h3>
+                        <h3 class="text-lg font-semibold">
+                            @if($device->type === 'light')
+                                <i class="bi bi-lightbulb-fill text-yellow-400"></i>
+                            @elseif($device->type === 'shutter')
+                                <i class="bi bi-window-sash text-blue-400"></i>
+                            @elseif($device->type === 'sensor')
+                                <i class="bi bi-thermometer text-red-400"></i>
+                            @endif
+                            {{ $device->nom }}</h3>
                         <p class="text-gray-300">Type: {{ $device->type }}</p>
-                        <!-- Additional device details can go here -->
+                        <p>mqtt: {{ $device->mqttTopic }}</p>
+                        {{-- Additional device details can go here --}}
+                        <p>
+                            @if($device->type === 'light')
+                                <p class="text-gray-300">État: {{ $device->etat === 'on' ? 'Allumé' : 'Éteint' }}</p>
+                            @elseif($device->type === 'shutter')
+                                <p class="text-gray-300">État: {{ $device->etat === 'open' ? 'Ouvert' : 'Fermé' }}</p>
+                            @elseif($device->type === 'sensor')
+                                <p class="text-gray-300">Valeur: {{ $device->valeur }}</p>
+                            @endif
+                        </p>
+                        {{-- ajouter un bouton pour allumer/up ou eteindre/down l'appareil selon son type et son état actuel --}}
+                        @if($device->type === 'light')
+                            @if($device->etat === 'on')
+                                <form action="{{ route('commande.send') }}" method="POST" class="mt-2">
+                                    @csrf
+                                    <input type="hidden" name="idDevice" value="{{ $device->id }}">
+                                    <input type="hidden" name="type" value="{{ $device->type }}">
+                                    <input type="hidden" name="valeur" value="off">
+                                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded transition">
+                                        Éteindre
+                                    </button>
+                                </form>
+                            @else
+                                <form action="{{ route('commande.send') }}" method="POST" class="mt-2">
+                                    @csrf
+                                    <input type="hidden" name="idDevice" value="{{ $device->id }}">
+                                    <input type="hidden" name="type" value="{{ $device->type }}">
+                                    <input type="hidden" name="valeur" value="on">
+                                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded transition">
+                                        Allumer
+                                    </button>
+                                </form>
+                            @endif
+                        @elseif($device->type === 'shutter')
+                            @if($device->etat === 'open')
+                                <form action="{{ route('commande.send') }}" method="POST" class="mt-2">
+                                    @csrf
+                                    <input type="hidden" name="idDevice" value="{{ $device->id }}">
+                                    <input type="hidden" name="type" value="{{ $device->type }}">
+                                    <input type="hidden" name="valeur" value="closed">
+                                    <button type="submit" class="bg-red-600 hover:bg-red-700 text   -white font-semibold py-2 px-4 rounded transition">
+                                        Fermer
+                                    </button>
+                                </form>
+                            @else
+                                <form action="{{ route('commande.send') }}" method="POST" class="mt-2">
+                                    @csrf
+                                    <input type="hidden" name="idDevice" value="{{ $device->id }}">
+                                    <input type="hidden" name="type" value="{{ $device->type }}">
+                                    <input type="hidden" name="valeur" value="open">
+                                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded transition">
+                                        Ouvrir
+                                    </button>
+                                </form>
+                            @endif
+                        @endif
                     </div>
                 @endforeach
             </div>
