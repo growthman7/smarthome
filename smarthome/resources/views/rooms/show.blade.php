@@ -1,5 +1,10 @@
 @extends('layouts.app')
 @section('content')
+    @if(session('success'))
+        <div class="alert bg-green-500 text-white p-2">
+            {{ session('message') }}
+        </div>
+    @endif
     <div class="container mx-auto py-8">
         <div class="flex items-center justify-between mb-6">
             <h1 class="text-3xl font-bold">Détails de la Pièce</h1>
