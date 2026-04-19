@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nom');
             $table->string('type');
             $table->string('etat')->default('off');
-            $table->string('mqttTopic');
+            $table->string('mqttTopic')->nullable();
             $table->foreignId('piece_id')->constrained('pieces')->onDelete('cascade');
             $table->timestamps();
         });
