@@ -7,16 +7,17 @@ use App\Models\Device;
 use App\Providers\MqttServiceProvider;
 use Illuminate\Http\Request;
 
-class CommandController extends Controller
+class CommandeController extends Controller
 {
-    public function send(Request $request, MqttServiceProvider $mqtt)
+    public function send(Request $request)
     {
+        dd(env("MQTT_PORT"));
         $device = Device::findOrFail($request->idDevice);
         if (!$device) {
             return response()->json(['message' => 'Device not found'], 404);
         }
         //Construction du topic MQTT
-        $topic = $device->mqttTopic . '/set';
+        $topic = $device->mqttTopic;
 
         //Créére la commande dans la base de données
         $command = Commande::create([
@@ -31,11 +32,14 @@ class CommandController extends Controller
         //     'type' => $request->typeCom,
         //     'value' => $request->valeur
         // ]);
-        $mqtt->publish($topic, json_encode([
-            'type' => $request->type,
-            'value' => $request->valeur
-        ]));
 
+        $server = env("MQTT_SERVER", "localhost");
+        $port = env("MQTT_PORT", 8883);
+        $port = env("MQTT_PORT", 8883);
+        $clientId = env("MQTT_CLIENTID", "laravel");
+        $mqtt = new \PhpMqtt\Client\MqttClient($server, $port, $clientId);
+        $mqtt->connect();
+        $mqtt->publish($topic, $request->valeur, 0);
         $mqtt->disconnect();
 
 
@@ -49,7 +53,7 @@ class CommandController extends Controller
     private function publishMqtt($topic, $payload)
     {
         // Exemple simple (lib php-mqtt)
-        $mqtt = new \PhpMqtt\Client\MqttClient('127.0.0.1', 1883);
+        $mqtt = new \PhpMqtt\Client\MqttClient(env('MQTT_SERVER', '127.0.0.1'), env("MQTT_PORT",1883));
 
         $mqtt->connect();
         $mqtt->publish($topic, json_encode($payload));

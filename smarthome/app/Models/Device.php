@@ -36,7 +36,7 @@ class Device extends Model
     public function generateTopic()
     {
         $maisonId = $this->piece->maison_id;
-        $pieceId = $this->piece_id;
+        $pieceId = strtolower($this->piece->nom);
         $typeDevice = $this->type;
         $deviceId = $this->id;
 

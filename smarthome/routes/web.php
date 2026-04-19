@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CommandeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\MaisonController;
@@ -54,6 +55,8 @@ Route::post('/rooms/store', [PieceController::class, 'store'])->middleware('auth
 // Routes for devices
 Route::post('/devices/store', [DeviceController::class, 'store'])->middleware('auth')->name('devices.store');
 
+//Routes for commandes
+Route::post('commande/send', [CommandeController::class, 'send'])->middleware('auth')->name('commande.send');
 // // Routes scènes
 // Route::get('/scenes', function () {
 //     return 'Scenes';
