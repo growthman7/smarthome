@@ -16,7 +16,12 @@
                 <label for="password" class="block text-sm font-medium text-gray-300">
                     Mot de passe
                 </label>
-                <input type="password" name="mdp" id="password" class="w-full p-2 bg-gray-700 border border-gray-600 placeholder:text-gray-500 text-white focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm" placeholder="••••••••" required>
+                <div class="flex items-center w-full bg-gray-700 border border-gray-600 placeholder:text-gray-500 text-white focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                    <input type="password" name="mdp" id="password" class="w-full p-2 bg-gray-700 border border-gray-600 placeholder:text-gray-500 text-white focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm" placeholder="••••••••" required>
+                    <button type="button" class="togglepassword">
+                        <i class="bi bi-eye px-2"></i>
+                    </button>
+                </div>
             </div>
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
@@ -48,3 +53,12 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+    <script>
+        document.querySelector('.togglepassword').addEventListener('click', () => {
+            const pwdInput = this.previousElementSibling;
+            pwdInput.type = (pwdInput.type === "password") ? "text" : "password";
+        });
+    </script>
+@endpush

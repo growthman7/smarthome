@@ -20,7 +20,7 @@
                         <!-- Example Room Card -->
                         <div class="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-lg p-4">
                             <div class="flex justify-between items-center mb-4">
-                                <h2 class="text-xl font-semibold">Salon</h2>
+                                <h2 class="text-xl font-semibold">{{ $room->nom }}</h2>
                                 <p class="text-gray-300"><i class="bi bi-house-door"></i> {{ $room->maison->nom }}</p>
                             </div>
                             <p class="text-gray-300">Pièce principale pour se détendre et recevoir des invités.</p>

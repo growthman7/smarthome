@@ -52,7 +52,7 @@
                     </div>
                     <div>
 
-                        <a href="{{ route('homes.show', $home->id) }}" class="bg-blue-500 rounded-lg p-2">
+                        <a href="{{ route('homes.show', $home->id) }}" class="bg-blue-500 rounded-lg p-2 hidden">
                             <i class="bi bi-eye text-white-500 text-2xl"></i>
                         </a>
                     </div>

@@ -6,17 +6,21 @@ use App\Models\Commande;
 use App\Models\Device;
 use App\Providers\MqttServiceProvider;
 use Illuminate\Http\Request;
+use PhpMqtt\Client\ConnectionSettings;
 
-class CommandController extends Controller
+class CommandeController extends Controller
 {
-    public function send(Request $request, MqttServiceProvider $mqtt)
+    public function send(Request $request)
     {
+        // dd(env("MQTT_PORT"));
         $device = Device::findOrFail($request->idDevice);
+
         if (!$device) {
             return response()->json(['message' => 'Device not found'], 404);
         }
         //Construction du topic MQTT
-        $topic = $device->mqttTopic; // Exemple : "home/{mais/livingroom/light1/command"
+        $topic = $device->mqttTopic;
+        // dd($topic);
 
         //Créére la commande dans la base de données
         $command = Commande::create([
@@ -25,31 +29,50 @@ class CommandController extends Controller
             'device_id' => $request->idDevice,
         ]);
 
+        if($device->etat === $request->valeur)
+        {
+            return redirect()->back()->with([
+                'success' => true,
+                'message' => 'Device stay '. $request->valeur .'.',
+            ]);
+        }
+
 
         // 🔥 ENVOI MQTT (ESP32)
         // $this->publishMqtt($device->mqttTopic, [
         //     'type' => $request->typeCom,
         //     'value' => $request->valeur
         // ]);
-        $mqtt->publish($topic, json_encode([
-            'type' => $request->type,
-            'value' => $request->valeur
-        ]));
 
+        $server = env("MQTT_SERVER", "localhost");
+        $port = env("MQTT_PORT", 8883);
+        $port = env("MQTT_PORT", 8883);
+        $clientId = env("MQTT_CLIENTID", "laravel");
+        $username = env('MQTT_USERNAME');
+        $password = env('MQTT_PASSWORD');
+
+        $connectionSettings = (new ConnectionSettings())
+            ->setUsername($username)
+            ->setPassword($password)
+            ->setUseTls(true);
+        $mqtt = new \PhpMqtt\Client\MqttClient($server, $port, $clientId);
+        $mqtt->connect($connectionSettings, true);
+        $mqtt->publish($topic, $request->valeur, 0);
         $mqtt->disconnect();
 
+        $device->etat = $request->valeur;
+        $device->save();
 
-
-        return response()->json([
+        return redirect()->back()->with([
+            'success' => true,
             'message' => 'Commande envoyée',
-            'command' => $command
         ]);
     }
 
     private function publishMqtt($topic, $payload)
     {
         // Exemple simple (lib php-mqtt)
-        $mqtt = new \PhpMqtt\Client\MqttClient('127.0.0.1', 1883);
+        $mqtt = new \PhpMqtt\Client\MqttClient(env('MQTT_SERVER', '127.0.0.1'), env("MQTT_PORT",1883));
 
         $mqtt->connect();
         $mqtt->publish($topic, json_encode($payload));
