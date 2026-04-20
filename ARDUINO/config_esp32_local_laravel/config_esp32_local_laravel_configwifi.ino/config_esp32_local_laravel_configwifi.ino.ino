@@ -9,11 +9,11 @@ Preferences preferences;
 
 WebServer server(80);
 
-char ssid[32];
-char password[64];
+string ssid;
+string password;
 bool wifiConfigured = false;
 
-char deviceId[18];
+string deviceId];
 
 // Paramètres réseau
 IPAddress local_IP(192, 168, 1, 254);   // IP fixe
@@ -23,16 +23,16 @@ IPAddress primaryDNS(8, 8, 8, 8);       // DNS primaire (Google)
 IPAddress secondaryDNS(8, 8, 4, 4);     // DNS secondaire (Google)
 
 // MQTT HiveMQ
-const char* mqtt_server = "xxxxx.s1.eu.hivemq.cloud";
+const char* mqtt_server = "86c6b61405e14199853067d4b067f0a2.s1.eu.hivemq.cloud";
 const int mqtt_port = 8883;
-const char* mqtt_user = "USERNAME";
-const char* mqtt_pass = "PASSWORD";
+const char* mqtt_user = "devmarc";
+const char* mqtt_pass = "1Dev*001";
 
 WiFiClientSecure espClient;
 PubSubClient client(espClient);
 
 //GPIO devices
-#define LED_SALON 2
+#define LED_SALON 3
 #define LED_CHAMBRE 4
 #define VOLET_PIN 5
 
@@ -265,7 +265,7 @@ void handleMessage(String topic, String message) {
 // Callback MQTT
 void callback(char* topic, byte* payload, unsigned int length) {
 
-  char message[length + 1];
+  string message[length + 1];
   memcpy(message, payload, length);
   message[length] = '\0';
 

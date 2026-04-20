@@ -16,7 +16,7 @@ class CommandController extends Controller
             return response()->json(['message' => 'Device not found'], 404);
         }
         //Construction du topic MQTT
-        $topic = $device->mqttTopic . '/set';
+        $topic = $device->mqttTopic; // Exemple : "home/{mais/livingroom/light1/command"
 
         //Créére la commande dans la base de données
         $command = Commande::create([

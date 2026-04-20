@@ -1,12 +1,14 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CommandeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\MaisonController;
 use App\Http\Controllers\PieceController;
 use GuzzleHttp\Middleware;
 use Illuminate\Support\Facades\Route;
+
 
 
 Route::get('/', [DashboardController::class, 'index'])->middleware('auth')->name('dashboard');
@@ -53,6 +55,9 @@ Route::post('/rooms/store', [PieceController::class, 'store'])->middleware('auth
 
 // Routes for devices
 Route::post('/devices/store', [DeviceController::class, 'store'])->middleware('auth')->name('devices.store');
+
+//Routes for commands
+Route::post('/commands/send', [CommandeController::class, 'send'])->middleware('auth')->name('commande.send');
 
 // // Routes scènes
 // Route::get('/scenes', function () {
