@@ -4,23 +4,25 @@
 #include <HTTPClient.h>
 #include <WiFiClientSecure.h>
 #include <PubSubClient.h>
+#include <ESP32Servo.h>
+#include <DHT.h>
 
 Preferences preferences;
-
+Servo myservo;
 WebServer server(80);
 
-string ssid;
-string password;
+String ssid;
+String password;
 bool wifiConfigured = false;
 
-string deviceId];
+String deviceId;
 
-// Paramètres réseau
-IPAddress local_IP(192, 168, 1, 254);   // IP fixe
-IPAddress gateway(192, 168, 1, 1);      // passerelle (souvent l’adresse du routeur)
-IPAddress subnet(255, 255, 255, 0);     // masque de sous-réseau
-IPAddress primaryDNS(8, 8, 8, 8);       // DNS primaire (Google)
-IPAddress secondaryDNS(8, 8, 4, 4);     // DNS secondaire (Google)
+// // Paramètres réseau
+// IPAddress local_IP(192, 168, 1, 254);   // IP fixe
+// IPAddress gateway(192, 168, 1, 1);      // passerelle (souvent l’adresse du routeur)
+// IPAddress subnet(255, 255, 255, 0);     // masque de sous-réseau
+// IPAddress primaryDNS(8, 8, 8, 8);       // DNS primaire (Google)
+// IPAddress secondaryDNS(8, 8, 4, 4);     // DNS secondaire (Google)
 
 // MQTT HiveMQ
 const char* mqtt_server = "86c6b61405e14199853067d4b067f0a2.s1.eu.hivemq.cloud";
@@ -32,9 +34,13 @@ WiFiClientSecure espClient;
 PubSubClient client(espClient);
 
 //GPIO devices
-#define LED_SALON 3
+#define LED_SALON 2
 #define LED_CHAMBRE 4
 #define VOLET_PIN 5
+#define DHTPIN 16       // Broche DATA connectée à D2
+#define DHTTYPE DHT22  // Type de capteur
+
+DHT dht(DHTPIN, DHTTYPE);
 
 static unsigned long lastWifiCheck = 0;
 /* ================================
@@ -109,8 +115,10 @@ String page = R"rawliteral(
 ================================ */
 
 String getWifiList(){
-  String options="";
-  int n = WiFi.scanNetworks(true);
+  String options;
+  options.reserve(512);
+
+  int n = WiFi.scanNetworks();
 
   for(int i=0;i<n;i++){
     options += "<option value='";
@@ -141,7 +149,7 @@ void handleRoot(){
    SAUVEGARDE WIFI
 ================================ */
 
-void saveWifi(String ssid,String password){
+void saveWifi(String ssid, String password){
   preferences.begin("wifi_config",false);
 
   preferences.putString("ssid",ssid);
@@ -180,8 +188,12 @@ bool loadWifi(){
 
 bool connectWifi(){
    // Configuration IP statique
-  if (!WiFi.config(local_IP, gateway, subnet, primaryDNS, secondaryDNS)) {
-    Serial.println("Erreur de configuration IP");
+  // if (!WiFi.config(local_IP, gateway, subnet, primaryDNS, secondaryDNS)) {
+  //   Serial.println("Erreur de configuration IP");
+  // }
+  bool isExist = loadWifi();
+  if(!isExist){
+    return false;
   }
   WiFi.begin(ssid.c_str(),password.c_str());
 
@@ -219,7 +231,7 @@ void handleMessage(String topic, String message) {
   Serial.println("Topic: " + topic);
   Serial.println("Message: " + message);
 
-  if (topic.split("/").length < 5) return;
+  // if (topic.split("/").length < 5) return;
   // Découper topic
   int first = topic.indexOf('/');
   int second = topic.indexOf('/', first + 1);
@@ -230,50 +242,49 @@ void handleMessage(String topic, String message) {
   String piece  = topic.substring(second + 1, third);
   String type   = topic.substring(third + 1, fourth);
   String device = topic.substring(fourth + 1);
-
+  Serial.println("Piece: " + piece);
   // 🔥 LOGIQUE INTELLIGENTE
 
   // 💡 LIGHT
   if (type == "light") {
 
     if (piece == "salon") {
-      digitalWrite(LED_SALON, message == "ON" ? HIGH : LOW);
+      digitalWrite(LED_SALON, message == "on" ? HIGH : LOW);
     }
 
     if (piece == "chambre") {
-      digitalWrite(LED_CHAMBRE, message == "ON" ? HIGH : LOW);
+      digitalWrite(LED_CHAMBRE, message == "on" ? HIGH : LOW);
     }
   }
 
   // 🪟 VOLET
-  else if (type == "volet") {
+  else if (type == "shutter") {
 
-    if (message == "OPEN") {
-      digitalWrite(VOLET_PIN, HIGH);
+    if (message == "open") {
+      myservo.write(90);
     } 
-    else if (message == "CLOSE") {
-      digitalWrite(VOLET_PIN, LOW);
+    else if (message == "close") {
+      myservo.write(0);
     }
   }
 
-  // 🌡️ TEMP (ex: config seuil)
-  else if (type == "temperature") {
-    Serial.println("Config température reçue");
-  }
+  // // 🌡️ TEMP (ex: config seuil)
+  // else if (type == "temperature") {
+  //   Serial.println("Config température reçue");
+  // }
 }
 
 // Callback MQTT
 void callback(char* topic, byte* payload, unsigned int length) {
 
-  string message[length + 1];
-  memcpy(message, payload, length);
-  message[length] = '\0';
+  char msg[length + 1]; // buffer C
+  memcpy(msg, payload, length);
+  msg[length] = '\0'; // fin de chaîne
 
-  for (int i = 0; i < length; i++) {
-    message += (char)payload[i];
-  }
+  Serial.printf("Topic: %s\n", topic);
+  Serial.printf("Message: %s\n", msg);
 
-  handleMessage(String(topic), message);
+  handleMessage(String(topic), String(msg));
 }
 
 // Reconexion
@@ -390,6 +401,8 @@ void clearSettings() {
 void setup(){
   //put the setup code here
   Serial.begin(115200);
+  dht.begin();
+  myservo.attach(18);
 
   pinMode(LED_SALON, OUTPUT);
   pinMode(LED_CHAMBRE, OUTPUT);
@@ -422,12 +435,12 @@ void setup(){
 
 void loop(){
   //put the loop code here
-  if (millis() - lastWifiCheck > 10000) {
-    lastWifiCheck = millis();
-    if (WiFi.status() != WL_CONNECTED) {
-      connectWifi();
-    }
-  }
+  // if (millis() - lastWifiCheck > 10000) {
+  //   lastWifiCheck = millis();
+  //   if (WiFi.status() != WL_CONNECTED) {
+  //     connectWifi();
+  //   }
+  // }
 
   server.handleClient();
 
