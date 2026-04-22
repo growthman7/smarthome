@@ -24,12 +24,12 @@
                 </div>
                 <div class="flex items-center space-x-2">
                     @if(auth()->check())
-                        <a href="#" class="text-gray-300 hover:text-white transition">
+                        {{-- <a href="#" class="text-gray-300 hover:text-white transition">
                             <i class="bi bi-bell-fill"></i>
                         </a>
                         <a href="#" class="text-gray-300 hover:text-white transition">
                             <i class="bi bi-gear-fill"></i>
-                        </a>
+                        </a> --}}
 
                         <form method="POST" action="{{ route('logout') }}" class="text-white hover:text-white transition bg-blue-500 rounded-lg p-2">
                             @csrf
@@ -62,7 +62,7 @@
                     <i class="bi bi-plus-circle-fill"></i>
                     Pièces
                 </a>
-                <a href="{{ route('dashboard') }}" class="w-full flex items-center px-6 py-3 {{ request()->routeIs('device') ? "text-blue-500" : "text-gray-300" }} hover:bg-gray-700/50 transition px-3 py-2 rounded">
+                <a href="{{ route('devices') }}" class="w-full flex items-center px-6 py-3 {{ request()->routeIs('device') ? "text-blue-500" : "text-gray-300" }} hover:bg-gray-700/50 transition px-3 py-2 rounded">
                     <i class="bi bi-webcam-fill"></i>
                     Appareils
                 </a>
@@ -86,7 +86,7 @@
                     <i class="bi bi-plus-circle-fill"></i>
                     Pièces
                 </a>
-                <a href="{{ route('dashboard') }}" class="flex flex-col items-center {{ request()->routeIs('device') ? "text-blue-500" : "text-gray-300" }} hover:bg-gray-700/50 transition px-3 py-2 rounded">
+                <a href="{{ route('devices') }}" class="flex flex-col items-center {{ request()->routeIs('device') ? "text-blue-500" : "text-gray-300" }} hover:bg-gray-700/50 transition px-3 py-2 rounded">
                     <i class="bi bi-webcam-fill"></i>
                     Appareils
                 </a>

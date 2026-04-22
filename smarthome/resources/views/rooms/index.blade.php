@@ -9,12 +9,12 @@
                 Ajouter une nouvelle pièce
             </a>
         </div>
-        <div class="">
+        <div class="mb-6">
             <div class="flex items-center justify-between">
                 <p class="underline">Toutes les pièces</p>
                 <p class="underline drop-shadow-[0_0_10px_rgba(255,255,255)]">Scroll -></p>
             </div>
-            <div class="flex flex-1 overflow-x-auto mt-2 gap-6">
+            <div class="flex flex-col md:flex-row lg:flex-row xl:flex-row overflow-x-auto mt-2 gap-6">
                 @if(auth()->check())
                     @forelse($pieces as $room)
                         <!-- Example Room Card -->

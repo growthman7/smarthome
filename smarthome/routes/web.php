@@ -54,6 +54,7 @@ Route::get('/rooms/{id}', [PieceController::class, 'show'])->middleware('auth')-
 Route::post('/rooms/store', [PieceController::class, 'store'])->middleware('auth')->name('rooms.store');
 
 // Routes for devices
+Route::get('/devices', [DeviceController::class, 'index'])->middleware('auth')->name('devices');
 Route::post('/devices/store', [DeviceController::class, 'store'])->middleware('auth')->name('devices.store');
 
 //Routes for commands

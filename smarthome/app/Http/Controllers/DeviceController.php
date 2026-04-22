@@ -12,12 +12,14 @@ class DeviceController extends Controller
     public function index()
     {
         //
-        $devices = Device::all();
-        return response()->json([
-            'success' => true,
-            'message' => 'Liste des appareils',
-            'data' => $devices
-        ]);
+        $devices = Device::with('piece.maison')->get();
+        // dd($devices);
+        // return response()->json([
+        //     'success' => true,
+        //     'message' => 'Liste des appareils',
+        //     'data' => $devices
+        // ]);
+        return view('devices.index', compact('devices'));
     }
 
     public function store(Request $request)
