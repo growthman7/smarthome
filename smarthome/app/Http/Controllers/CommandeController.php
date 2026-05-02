@@ -46,7 +46,6 @@ class CommandeController extends Controller
 
         $server = env("MQTT_SERVER", "localhost");
         $port = env("MQTT_PORT", 8883);
-        $port = env("MQTT_PORT", 8883);
         $clientId = env("MQTT_CLIENTID", "laravel");
         $username = env('MQTT_USERNAME');
         $password = env('MQTT_PASSWORD');

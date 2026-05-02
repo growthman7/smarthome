@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommandeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceController;
+use App\Http\Controllers\DonneeController;
 use App\Http\Controllers\MaisonController;
 use App\Http\Controllers\PieceController;
 use GuzzleHttp\Middleware;
@@ -60,6 +61,7 @@ Route::post('/devices/store', [DeviceController::class, 'store'])->middleware('a
 //Routes for commands
 Route::post('/commands/send', [CommandeController::class, 'send'])->middleware('auth')->name('commande.send');
 
+Route::get('/temperature', [DonneeController::class, 'temperature'])->middleware('auth')->name('temperature');
 // // Routes scènes
 // Route::get('/scenes', function () {
 //     return 'Scenes';

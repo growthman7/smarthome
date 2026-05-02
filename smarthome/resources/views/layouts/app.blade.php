@@ -86,7 +86,7 @@
                     <i class="bi bi-plus-circle-fill"></i>
                     Pièces
                 </a>
-                <a href="{{ route('devices') }}" class="flex flex-col items-center {{ request()->routeIs('device') ? "text-blue-500" : "text-gray-300" }} hover:bg-gray-700/50 transition px-3 py-2 rounded">
+                <a href="{{ route('devices') }}" class="flex flex-col items-center {{ request()->routeIs('devices') ? "text-blue-500" : "text-gray-300" }} hover:bg-gray-700/50 transition px-3 py-2 rounded">
                     <i class="bi bi-webcam-fill"></i>
                     Appareils
                 </a>

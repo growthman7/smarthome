@@ -23,7 +23,9 @@
             <div class="relative z-10 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 mb-4 flex justify-between items-center gap-6 shadow-2xl hover:scale-[1.02] transition duration-300">
                 <div>
                     <p class="text-gray-300 text-sm">Température de la maison</p>
-                    <div class="text-4xl font-bold text-white">22°C</div>
+                    <div class="text-4xl font-bold text-white">
+                        <span id="temp">0</span>
+                        °C</div>
                 </div>
                 <div>
                     <img src="https://cdn-icons-png.flaticon.com/512/1116/1116453.png"
@@ -72,8 +74,13 @@
 
         <div class="flex overflow-x-auto gap-2 py-3">
             <a href="{{ route('rooms') }}" class="flex items-center justify-center bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl hover:scale-105 transition rounded-full px-3 py-1"><i class="bi bi-plus text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"></i></a>
-            <!-- Les pièces se trouvant dans la maison -->
-            <div class="bg-yellow-500 backdrop-blur-lg border border-gray-700 rounded-md px-3 py-1">
+            @foreach($maison->pieces as $piece)
+                <div class="bg-yellow-500 backdrop-blur-lg border border-gray-700 rounded-md px-3 py-1">
+                    {{ $piece->nom }}
+                </div>
+            @endforeach
+            {{-- Les pièces se trouvant dans la maison --}}
+            {{-- <div class="bg-yellow-500 backdrop-blur-lg border border-gray-700 rounded-md px-3 py-1">
                 Salon
             </div>
 
@@ -87,11 +94,11 @@
 
             <div class="bg-yellow-500 backdrop-blur-lg border border-gray-700 rounded-lg px-3 py-1">
                 kitchen
-            </div>
+            </div> --}}
         </div>
 
         <div class="grid grid-cols-2 gap-2 py-3 "><!-- Les pièces se trouvant dans la maison -->
-            <div class="card relative z-10 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 mb-4 flex justify-between items-center gap-6 shadow-2xl hover:scale-[1.02] transition duration-300">
+            {{-- <div class="card relative z-10 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 mb-4 flex justify-between items-center gap-6 shadow-2xl hover:scale-[1.02] transition duration-300">
                 <div>
                     <p class="text-gray-300 text-sm"><i class="bi bi-lightbulb"></i>Toutes les lumières</p>
                     <div class="data text-2xl font-bold text-red-500">OFF</div>
@@ -101,44 +108,100 @@
                         <i class="bi bi-toggle-off text-red-500 text-2xl"></i>
                     </button>
                 </div>
-            </div>
-            <div class="card relative z-10 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 mb-4 flex justify-between items-center gap-6 shadow-2xl hover:scale-[1.02] transition duration-300">
-                <div>
-                    <p class="text-gray-300 text-sm"><i class="bi bi-lightbulb"></i>Salon</p>
-                    <div class="data text-2xl font-bold text-green-500">ON</div>
+            </div> --}}
+            @foreach($maison->pieces as $key => $piece)
+                <div class="card relative z-10 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 mb-4 flex justify-between items-center gap-6 shadow-2xl hover:scale-[1.02] transition duration-300">
+                    <div>
+                        <p class="text-gray-300 text-sm">
+                            @if($piece->devices[0]->type == 'light')
+                                <i class="bi bi-lightbulb"></i>
+                            @elseif($piece->devices[0]->type == 'shutter')
+                                <i class="bi bi-window"></i>
+                            @endif
+                            {{ $maison->pieces[$key]->nom }}</p>
+                            @if($piece->devices[0]->type == 'light' && $piece->devices[0]->etat == 'on')
+                                <div class="data text-2xl font-bold text-green-500">
+                                    ON
+                                </div>
+                            </div>
+                            <form action="{{ route('commande.send') }}" method="POST" class="mt-2">
+                                @csrf
+                                <input type="hidden" name="idDevice" value="{{ $piece->devices[0]->id }}">
+                                <input type="hidden" name="type" value="{{ $piece->devices[0]->type }}">
+                                <input type="hidden" name="valeur" value="{{ $piece->devices[0]->etat === 'on' ? 'off' : 'on' }}">
+                                <button type="submit">
+                                    <i class="bi bi-toggle-on text-green-500 text-2xl"></i>
+                                </button>
+                            </form>
+                            @elseif($piece->devices[0]->type == 'light' && $piece->devices[0]->etat == 'off')
+                                <div class="data text-2xl font-bold text-red-500">
+                                    OFF
+                                </div>
+                            </div>
+                            <form action="{{ route('commande.send') }}" method="POST" class="mt-2">
+                                @csrf
+                                <input type="hidden" name="idDevice" value="{{ $piece->devices[0]->id }}">
+                                <input type="hidden" name="type" value="{{ $piece->devices[0]->type }}">
+                                <input type="hidden" name="valeur" value="{{ $piece->devices[0]->etat === 'on' ? 'off' : 'on' }}">
+                                <button type="submit">
+                                    <i class="bi bi-toggle-off text-red-500 text-2xl"></i>
+                                </button>
+                            </form>
+                            @elseif($piece->devices[0]->type == 'shutter' && $piece->devices[0]->etat == 'up')
+                                <div class="data text-2xl font-bold text-green-500">
+                                    UP
+                                </div>
+                            </div>
+                            <form action="{{ route('commande.send') }}" method="POST" class="mt-2">
+                                @csrf
+                                <input type="hidden" name="idDevice" value="{{ $piece->devices[0]->id }}">
+                                <input type="hidden" name="type" value="{{ $piece->devices[0]->type }}">
+                                <input type="hidden" name="valeur" value="{{ $piece->devices[0]->etat === 'up' ? 'down' : 'up' }}">
+                                <button type="submit">
+                                    <i class="bi bi-toggle-on text-green-500 text-2xl"></i>
+                                </button>
+                            </form>
+                            @elseif($piece->devices[0]->type == 'shutter' && $piece->devices[0]->etat == 'down')
+                                <div class="data text-2xl font-bold text-red-500">
+                                    DOWN
+                                </div>
+                            </div>
+                            <form action="{{ route('commande.send') }}" method="POST" class="mt-2">
+                                @csrf
+                                <input type="hidden" name="idDevice" value="{{ $piece->devices[0]->id }}">
+                                <input type="hidden" name="type" value="{{ $piece->devices[0]->type }}">
+                                <input type="hidden" name="valeur" value="{{ $piece->devices[0]->etat === 'up' ? 'down' : 'up' }}">
+                                <button type="submit">
+                                    <i class="bi bi-toggle-off text-red-500 text-2xl"></i>
+                                </button>
+                            </form>
+                            @endif
                 </div>
-                <div>
-                    <button>
-                        <i class="bi bi-toggle-on text-green-500 text-2xl"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="card relative z-10 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 mb-4 flex justify-between items-center gap-6 shadow-2xl hover:scale-[1.02] transition duration-300">
-                <div>
-                    <p class="text-gray-300 text-sm"><i class="bi bi-window"></i>Chambre 1</p>
-                    <div class="data text-2xl font-bold text-green-500">UP</div>
-                </div>
-                <div>
-                    <button>
-                        <i class="bi bi-toggle-on text-green-500 text-2xl"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="card relative z-10 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 mb-4 flex justify-between items-center gap-6 shadow-2xl hover:scale-[1.02] transition duration-300">
-                <div>
-                    <p class="text-gray-300 text-sm"><i class="bi bi-lightbulb"></i>Toutes les lumières</p>
-                    <div class="data text-2xl font-bold text-green-500">ON</div>
-                </div>
-                <div>
-                    <button>
-                        <i class="bi bi-toggle-on text-green-500 text-2xl"></i>
-                    </button>
-                </div>
-            </div>
+            @endforeach
         </div>
     </div>
 @endsection
 
 {{-- la stack des scripts  --}}
 @push('scripts')
+    <script>
+        // Fonction pour récupérer la température actuelle
+        async function fetchTemperature() {
+            try {
+                const response = await fetch('{{ route('temperature') }}');
+                const data = await response.json();
+                if (data.success) {
+                    console.log('Température actuelle:', data.data.valeur);
+                    document.getElementById('temp').textContent = data.data.valeur;
+                }
+            } catch (error) {
+                console.error('Erreur lors de la récupération de la température:', error);
+            }
+        }
+
+        // Récupérer la température toutes les 5 secondes
+        setInterval(fetchTemperature, 5000);
+        // Récupérer la température immédiatement au chargement de la page
+        fetchTemperature();
+    </script>
 @endpush

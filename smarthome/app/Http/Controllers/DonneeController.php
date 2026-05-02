@@ -52,6 +52,16 @@ class DonneeController extends Controller
         ], 201);
     }
 
+    public function temperature()
+    {
+        $temperature = Donnee::where('type', 'temperature')->latest()->first();
+        return response()->json([
+            'success' => true,
+            'message' => 'Température actuelle',
+            'data' => $temperature
+        ], 200);
+    }
+
     /**
      * Display the specified resource.
      */

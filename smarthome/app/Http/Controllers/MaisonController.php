@@ -44,7 +44,7 @@ class MaisonController extends Controller
     public function show($id)
     {
         //
-        $maison = Maison::whereHas('users', function ($query) {
+        $maison = Maison::with('pieces.devices')->whereHas('users', function ($query) {
             $query->where('id', auth()->id());
         })->find($id);
 
